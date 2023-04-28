@@ -11,6 +11,7 @@ type server struct {
 }
 
 func NewServer(
+	serverConf *ServerConfig,
 	getStream func() *gortsplib.ServerStream,
 ) *server {
 	s := &server{
@@ -20,12 +21,12 @@ func NewServer(
 	// configure the server
 	rs := &gortsplib.Server{
 		Handler:           s,
-		RTSPAddress:       ":8554",
-		UDPRTPAddress:     ":8000",
-		UDPRTCPAddress:    ":8001",
-		MulticastIPRange:  "224.1.0.0/16",
-		MulticastRTPPort:  8002,
-		MulticastRTCPPort: 8003,
+		RTSPAddress:       serverConf.TcpPort,
+		UDPRTPAddress:     serverConf.UdpPort,
+		UDPRTCPAddress:    serverConf.UdpRtcpPort,
+		MulticastIPRange:  serverConf.MulticastIpRange,
+		MulticastRTPPort:  serverConf.MulticastRTPPort,
+		MulticastRTCPPort: serverConf.MulticastRTCPPort,
 	}
 
 	// start server and wait until a fatal error

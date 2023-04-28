@@ -1,8 +1,12 @@
 package main
 
-import "gobs/internal"
+import (
+	"gobs/internal"
+	"time"
+)
 
 func main() {
-	c := internal.NewClient()
-	internal.NewServer(c.GetStream)
+	conf := internal.NewProxyConfig()
+	c := internal.NewClient(conf.ClientConf.ClientAddr, time.Millisecond*time.Duration(conf.ClientConf.ReconnectPause))
+	internal.NewServer(conf.ServerConf, c.GetStream)
 }
