@@ -4,11 +4,11 @@ WORKDIR "/go/src/app"
 
 COPY . .
 
-RUN GO111MODULE=on GOOS=linux GOARCH=amd64 go build -o /gobs cmd/main.go
+RUN GO111MODULE=on GOOS=linux GOARCH=amd64 go build -o /strmr cmd/main.go
 
 FROM debian:stable-slim as prod
 
-COPY --from=builder "/gobs" .
+COPY --from=builder "/strmr" .
 
 RUN apt update -y && apt install -y libc6
 
@@ -16,4 +16,4 @@ RUN echo 'DPkg::Post-Invoke {"/bin/rm -f /var/cache/apt/archives/*.deb || true";
 
 COPY configs /configs
 
-CMD ./gobs
+CMD ./strmr
