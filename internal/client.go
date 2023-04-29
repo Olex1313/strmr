@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type client struct {
+type Client struct {
 	mutex    sync.RWMutex
 	stream   *gortsplib.ServerStream
 	mCache   *mediaCache
@@ -20,8 +20,8 @@ type client struct {
 	recPause time.Duration
 }
 
-func NewClient(addr string, recp time.Duration) *client {
-	c := &client{
+func NewClient(addr string, recp time.Duration) *Client {
+	c := &Client{
 		addr:     addr,
 		recPause: recp,
 	}
@@ -33,17 +33,12 @@ func NewClient(addr string, recp time.Duration) *client {
 	return c
 }
 
-func (c *client) run() {
-	for {
-		err := c.read()
-		if err != nil {
-			break
-		}
-		log.Printf("ERR: %s\n", err)
-	}
+func (c *Client) run() {
+	err := c.read()
+	log.Printf("ERR: %s\n", err)
 }
 
-func (c *client) close() {
+func (c *Client) close() {
 	func() {
 		// remove stream from getStream()
 		c.mutex.Lock()
@@ -52,13 +47,13 @@ func (c *client) close() {
 	}()
 }
 
-func (c *client) GetStream() *gortsplib.ServerStream {
+func (c *Client) GetStream() *gortsplib.ServerStream {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	return c.stream
 }
 
-func (c *client) connect() (*gortsplib.Client, error) {
+func (c *Client) connect(cancel *context.CancelFunc) (*gortsplib.Client, error) {
 	rc := gortsplib.Client{}
 
 	// parse URL
@@ -90,6 +85,9 @@ func (c *client) connect() (*gortsplib.Client, error) {
 
 	log.Printf("stream is ready and can be read from the server at rtsp://localhost:8554/stream\n")
 
+	if cancel != nil {
+		(*cancel)()
+	}
 	// make stream available by using getStream()
 	c.mutex.Lock()
 	c.stream = stream
@@ -106,7 +104,7 @@ func (c *client) connect() (*gortsplib.Client, error) {
 	return &rc, nil
 }
 
-func (c *client) awaitForReconnect(ctx context.Context, ch chan bool) {
+func (c *Client) awaitForReconnect(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -115,47 +113,36 @@ func (c *client) awaitForReconnect(ctx context.Context, ch chan bool) {
 				panic("TimedOut")
 			}
 			return
-		case <-ch:
-		}
-	}
-}
-
-func (c *client) publishCache(ctx context.Context, ch chan bool) {
-	for {
-		select {
-		case <-ctx.Done():
-			log.Printf("Resuming stream")
-			return
-		case <-ch:
+		default:
+			//log.Printf("Publishing cache")
 			c.stream.WritePacketRTP(c.mCache.mediaPair())
 		}
 	}
 }
 
-func (c *client) read() error {
-	rc, err := c.connect()
+func (c *Client) read() error {
+	rc, err := c.connect(nil)
 	// wait until a fatal error or client fails
-	err = rc.Wait()
-	if err.Error() == "EOF" && c.mCache.cacheReady() {
-		ctx, cancel := context.WithTimeout(context.Background(), c.recPause)
-		ch := make(chan bool)
-		go c.awaitForReconnect(ctx, ch)
-		go c.publishCache(ctx, ch)
-		rc = c.tryReconnect()
-		cancel()
-	} else if err != nil {
-		return err
+	for {
+		err = rc.Wait()
+		if err.Error() == "EOF" && c.mCache.cacheReady() {
+			ctx, cancel := context.WithTimeout(context.Background(), c.recPause)
+			go c.awaitForReconnect(ctx)
+			rc = c.tryReconnect(&cancel)
+		} else if err != nil {
+			return err
+		}
 	}
-	return nil
 }
 
-func (c *client) tryReconnect() *gortsplib.Client {
+func (c *Client) tryReconnect(cancel *context.CancelFunc) *gortsplib.Client {
 	for {
-		rc, err := c.connect()
+		rc, err := c.connect(cancel)
 		if err != nil {
 			log.Printf("Reconnect try failed... %s", err.Error())
 			continue
 		}
+		log.Printf("Recovered")
 		return rc
 	}
 }

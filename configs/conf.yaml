@@ -1,4 +1,4 @@
 client:
   addr: "rtsp://192.168.1.66:8554/live"
-  reconnect-pause: 6000
+  reconnect-pause: 20000
 
