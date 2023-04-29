@@ -1,0 +1,5 @@
+*.md
+Makefile
+.git
+.gitignore
+.github
