@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v3"
+	"log"
 	"os"
 )
 
 type ServerConfig struct {
-	TcpPort           string `yaml:"tcp-port" envconfig:"SERVER_TCP_PORT" default:":8554"`
+	TcpPort           string `yaml:"tcp-port" envconfig:"SERVER_TCP_PORT" default:""`
 	UdpPort           string `yaml:"udp-port" envconfig:"SERVER_UDP_PORT" default:""`
 	UdpRtcpPort       string `yaml:"udp-rtcp-port" envconfig:"SERVER_UDP_RTCP_PORT" default:""`
 	MulticastIpRange  string `yaml:"multicast-ip-range" envconfig:"SERVER_MULTICAST_IP_RANGE" default:""`
@@ -26,9 +27,12 @@ type ProxyConfig struct {
 	ServerConf *ServerConfig `yaml:"server"`
 }
 
-func NewProxyConfig() *ProxyConfig {
+func NewProxyConfig(path *string) *ProxyConfig {
+	if path == nil {
+		log.Fatal("Path to config is invalid")
+	}
 	c := ProxyConfig{}
-	readFile("configs/conf.yaml", &c)
+	readFile(*path, &c)
 	readEnv(&c)
 	fmt.Println(c.ClientConf)
 	fmt.Println(c.ServerConf)

@@ -21,5 +21,5 @@ SERVER_UDP_RTCP_PORT
 ### How to use:
 
 1. Run `make build` to compile `strmr` executable file
-2. Put config file to `configs/conf.yaml` relative to executable file path
-3. Run executable `./strmr`
+2. Put config file to `configs/conf.yaml` relative to executable file path or specify with flag `--config`
+3. Run executable `./strmr --config your-conf.yaml`
