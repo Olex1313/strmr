@@ -9,11 +9,11 @@ import (
 
 type ServerConfig struct {
 	TcpPort           string `yaml:"tcp-port" envconfig:"SERVER_TCP_PORT" default:":8554"`
-	UdpPort           string `yaml:"udp-port" envconfig:"SERVER_UDP_PORT" default:":8000"`
-	UdpRtcpPort       string `yaml:"udp-rtcp-port" envconfig:"SERVER_UDP_RTCP_PORT" default:":8001"`
-	MulticastIpRange  string `yaml:"multicast-ip-range" envconfig:"SERVER_MULTICAST_IP_RANGE" default:"224.1.0.0/16"`
-	MulticastRTPPort  int    `yaml:"multicast-rtp-port" envconfig:"SERVER_MULTICAST_RTP_PORT" default:"8002"`
-	MulticastRTCPPort int    `yaml:"multicast-rtcp-port" envconfig:"SERVER_MULTICAST_RTCP_PORT" default:"8003"`
+	UdpPort           string `yaml:"udp-port" envconfig:"SERVER_UDP_PORT" default:""`
+	UdpRtcpPort       string `yaml:"udp-rtcp-port" envconfig:"SERVER_UDP_RTCP_PORT" default:""`
+	MulticastIpRange  string `yaml:"multicast-ip-range" envconfig:"SERVER_MULTICAST_IP_RANGE" default:""`
+	MulticastRTPPort  int    `yaml:"multicast-rtp-port" envconfig:"SERVER_MULTICAST_RTP_PORT" default:""`
+	MulticastRTCPPort int    `yaml:"multicast-rtcp-port" envconfig:"SERVER_MULTICAST_RTCP_PORT" default:""`
 }
 
 type ClientConfig struct {
