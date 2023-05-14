@@ -16,4 +16,4 @@ The only required properties are CLIENT_ADDR and CLIENT_RECONNECT_PAUSE, if you 
 
 1. Run `make build` to compile `strmr` executable file
 2. Put config file to `configs/conf.yaml` relative to executable file path
-3. Run executable
+3. Run executable `./strmr`
