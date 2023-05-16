@@ -13,17 +13,19 @@ import (
 )
 
 type Client struct {
-	mutex    sync.RWMutex
-	stream   *gortsplib.ServerStream
-	mCache   *mediaCache
-	addr     string
-	recPause time.Duration
+	mutex       sync.RWMutex
+	stream      *gortsplib.ServerStream
+	mCache      *mediaCache
+	addr        string
+	recPause    time.Duration
+	recInterval time.Duration
 }
 
-func NewClient(addr string, recp time.Duration) *Client {
+func NewClient(addr string, recp time.Duration, reci time.Duration) *Client {
 	c := &Client{
-		addr:     addr,
-		recPause: recp,
+		addr:        addr,
+		recPause:    recp,
+		recInterval: reci,
 	}
 	c.mCache = newMediaCache()
 
@@ -114,7 +116,6 @@ func (c *Client) awaitForReconnect(ctx context.Context) {
 			}
 			return
 		default:
-			//log.Printf("Publishing cache")
 			c.stream.WritePacketRTP(c.mCache.mediaPair())
 		}
 	}
@@ -140,6 +141,7 @@ func (c *Client) tryReconnect(cancel *context.CancelFunc) *gortsplib.Client {
 		rc, err := c.connect(cancel)
 		if err != nil {
 			log.Printf("Reconnect try failed... %s", err.Error())
+			time.Sleep(c.recInterval)
 			continue
 		}
 		log.Printf("Recovered")

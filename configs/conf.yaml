@@ -1,6 +1,7 @@
 client:
   addr: "rtsp://192.168.1.66:8554/live"
   reconnect-pause: 20000
+  reconnect-interval: 1000
 server:
   tcp-port: :8554
   udp-port: :8000

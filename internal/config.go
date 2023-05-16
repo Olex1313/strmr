@@ -18,8 +18,9 @@ type ServerConfig struct {
 }
 
 type ClientConfig struct {
-	ClientAddr     string `yaml:"addr" envconfig:"CLIENT_ADDR"`
-	ReconnectPause int    `yaml:"reconnect-pause" envconfig:"CLIENT_RECONNECT_PAUSE"`
+	ClientAddr        string `yaml:"addr" envconfig:"CLIENT_ADDR"`
+	ReconnectPause    int    `yaml:"reconnect-pause" envconfig:"CLIENT_RECONNECT_PAUSE"`
+	ReconnectInterval int    `yaml:"reconnect-interval" envconfig:"CLIENT_RECONNECT_INTERVAL"`
 }
 
 type ProxyConfig struct {
